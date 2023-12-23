@@ -17,6 +17,18 @@ module Api
         end
       end
 
+      def customer_login
+        customer = Customer.find_by(email: params[:email])
+
+        if customer&.authenticate(params[:password])
+          token = generate_token(customer)
+          customer = CustomerSerializer.new(customer).serializable_hash
+          render json: { token: token, customer: customer }
+        else
+          render json: { error: 'Invalid email or password' }, status: :unauthorized
+        end
+      end
+
       private
 
       def generate_token(user)

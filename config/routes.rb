@@ -13,9 +13,11 @@ Rails.application.routes.draw do
     namespace 'v1', defaults: { format: :json } do
       # event orgainzer auth
       post '/organizer/login', to: 'sessions#login'
-
-      # event orgainer registration
       post '/organizer/sign_up', to: 'event_organizers#create'
+
+      # Customer auth routes
+      post '/customer/login', to: 'sessions#customer_login'
+      post '/customer/sign_up', to: 'customers#create'
     end
   end
 end
