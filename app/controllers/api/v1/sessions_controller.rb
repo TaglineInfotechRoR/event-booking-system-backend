@@ -12,6 +12,14 @@ module Api
           token = generate_token(customer)
           customer = CustomerSerializer.new(customer).serializable_hash
           render json: { token: token, customer: customer }
+
+      def login
+        event_organizer = EventOrganizer.find_by(email: params[:email])
+
+        if event_organizer&.authenticate(params[:password])
+          token = generate_token(event_organizer)
+          event_organizer = EventOrganizerSerializer.new(event_organizer).serializable_hash
+          render json: { token: token, event_organizer: event_organizer }
         else
           render json: { error: 'Invalid email or password' }, status: :unauthorized
         end

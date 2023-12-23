@@ -14,6 +14,9 @@ Rails.application.routes.draw do
       # customer auth
       post '/customer/login', to: 'sessions#customer_login'
       post '/customer/sign_up', to: 'customers#create'
+      # event orgainzer auth
+      post '/organizer/login', to: 'sessions#login'
+      post '/organizer/sign_up', to: 'event_organizers#create'
     end
   end
 end
