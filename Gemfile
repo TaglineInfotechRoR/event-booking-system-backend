@@ -8,6 +8,7 @@ gem 'rails', '~> 7.1'
 
 gem 'bcrypt', '~> 3.1.7'
 gem 'bootsnap', require: false # Reduces boot times through caching; required in config/boot.rb
+gem 'jsonapi-serializer', '~> 2.2.0'
 gem 'pg', '~> 1.1'
 gem 'puma', '>= 5.0'
 gem 'rubocop-rails', require: false
