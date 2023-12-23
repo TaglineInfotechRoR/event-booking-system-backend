@@ -9,4 +9,13 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+  namespace 'api' do
+    namespace 'v1', defaults: { format: :json } do
+      # event orgainzer auth
+      post '/organizer/login', to: 'sessions#login'
+
+      # event orgainer registration
+      post '/organizer/sign_up', to: 'event_organizers#create'
+    end
+  end
 end
