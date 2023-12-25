@@ -17,6 +17,7 @@ module Api
             ticket = booking.ticket
             remaining_tickets = ticket.availability - booking.quantity
             ticket.update(availability: remaining_tickets)
+            BookingConfirmationJob.perform_async(@current_user.id, booking.id)
             booking = BookingSerializer.new(booking).serializable_hash
             render json: { message: 'Event booked successfully', booking: booking }
           else
