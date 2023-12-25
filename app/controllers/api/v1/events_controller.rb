@@ -8,7 +8,7 @@ module Api
           events = @current_user.events
           render json: { events: events }
         else
-          ender json: { error: 'You do not have permission to view others events.' }, status: :unauthorized
+          render json: { error: 'You do not have permission to view others events.' }, status: :unauthorized
         end
       end
 
