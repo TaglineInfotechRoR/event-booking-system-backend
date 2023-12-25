@@ -17,7 +17,8 @@ module Api
           event = Event.new(event_params)
           event.event_organizer_id = @current_user.id
           if event.save
-            render json: { message: 'Event created successfully' }
+            event = EventSerializer.new(event).serializable_hash
+            render json: { message: 'Event created successfully', event: event }
           else
             render json: { error: event.errors.full_messages }, status: :unprocessable_entity
           end
@@ -38,7 +39,8 @@ module Api
 
         if @current_user.instance_of?(EventOrganizer) && @current_user.events.include?(event)
           if event.update(event_params)
-            render json: { message: 'Event updated successfully' }
+            event = EventSerializer.new(event).serializable_hash
+            render json: { message: 'Event updated successfully', event: event }
           else
             render json: { error: event.errors.full_messages }, status: :unprocessable_entity
           end
@@ -51,7 +53,8 @@ module Api
         event = Event.find_by(id: params[:id])
         if @current_user.instance_of?(EventOrganizer) && @current_user.events.include?(event)
           if event.destroy
-            render json: { message: 'Event deleted successfully' }
+            event = EventSerializer.new(event).serializable_hash
+            render json: { message: 'Event deleted successfully', event: event }
           else
             render json: { error: event.errors.full_messages }, status: :unprocessable_entity
           end
