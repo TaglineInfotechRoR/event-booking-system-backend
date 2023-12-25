@@ -21,6 +21,9 @@ Rails.application.routes.draw do
 
       # Event routes
       resources :events
+
+      # Ticket routes
+      resources :tickets, only: %i[update destroy]
     end
   end
 end
