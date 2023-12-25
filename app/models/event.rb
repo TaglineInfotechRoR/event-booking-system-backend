@@ -5,6 +5,7 @@ class Event < ApplicationRecord
   has_many :tickets, dependent: :destroy
   accepts_nested_attributes_for :tickets, allow_destroy: true
   has_many :bookings, dependent: :destroy
+  has_many :customers, through: 'bookings'
 
   validates :name, :date, :venue, presence: true
 end

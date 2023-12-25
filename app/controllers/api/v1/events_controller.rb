@@ -39,6 +39,7 @@ module Api
 
         if @current_user.instance_of?(EventOrganizer) && @current_user.events.include?(event)
           if event.update(event_params)
+            EventConfirmationJob.perform_async(event.id)
             event = EventSerializer.new(event).serializable_hash
             render json: { message: 'Event updated successfully', event: event }
           else
