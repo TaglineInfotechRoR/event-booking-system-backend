@@ -7,10 +7,9 @@ class ApplicationController < ActionController::API
 
   def authenticate_request
     token = request.headers['Authorization']&.split(' ')&.last
-    decoded_token = JWT.decode(token, Rails.application.credentials.jwt_secret_key).first
+    decoded_token = JWT.decode(token, Rails.application.credentials.secret_key_base).first
     user_type = decoded_token['user_type']
     user_id = decoded_token['user_id']
-
     @current_user = user_type.constantize.find(user_id)
   rescue JWT::DecodeError, JWT::VerificationError, JWT::ExpiredSignature
     render json: { error: 'Unauthorized' }, status: :unauthorized
