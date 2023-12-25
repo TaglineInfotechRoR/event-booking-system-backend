@@ -24,6 +24,8 @@ Rails.application.routes.draw do
       post '/customer/sign_up', to: 'customers#create'
 
       resources :events # Event routes
+      resources :customers, only: %i[update destroy]
+      resources :event_organizers, only: %i[update destroy]
       resources :tickets, only: %i[update destroy] # Ticket routes
 
       resources :bookings, only: %i[create] # Booking routes
