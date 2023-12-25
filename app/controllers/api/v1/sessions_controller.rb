@@ -32,7 +32,7 @@ module Api
       private
 
       def generate_token(user)
-        secret_key = Rails.application.credentials.jwt_secret_key
+        secret_key = Rails.application.credentials.secret_key_base
         JWT.encode({ user_id: user.id, user_type: user.class.name, exp: 24.hours.from_now.to_i }, secret_key)
       end
     end
