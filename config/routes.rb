@@ -19,8 +19,10 @@ Rails.application.routes.draw do
       post '/customer/login', to: 'sessions#customer_login'
       post '/customer/sign_up', to: 'customers#create'
 
-      # Event routes
-      resources :events
+      resources :events # Event routes
+      resources :tickets, only: %i[update destroy] # Ticket routes
+
+      resources :bookings, only: %i[create] # Booking routes
     end
   end
 end

@@ -8,7 +8,7 @@ module Api
           events = @current_user.events
           render json: { events: events }
         else
-          ender json: { error: 'You do not have permission to view others events.' }, status: :unauthorized
+          render json: { error: 'You do not have permission to view others events.' }, status: :unauthorized
         end
       end
 
@@ -66,7 +66,7 @@ module Api
       private
 
       def event_params
-        params.require(:event).permit(:name, :date, :venue)
+        params.require(:event).permit(:name, :date, :venue, tickets_attributes: %i[ticket_type price availability])
       end
     end
   end

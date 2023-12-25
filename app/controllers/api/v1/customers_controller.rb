@@ -9,7 +9,7 @@ module Api
         customer = Customer.new(customer_params)
 
         if customer.save
-          render json: { message: 'Organizer created successfully' }
+          render json: { message: 'Customer created successfully' }
         else
           render json: { error: customer.errors.full_messages }, status: :unprocessable_entity
         end
