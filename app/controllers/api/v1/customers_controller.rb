@@ -15,6 +15,32 @@ module Api
         end
       end
 
+      def update
+        if @current_user.instance_of?(Customer)
+          if @current_user.update(customer_params)
+            customer = CustomerSerializer.new(@current_user).serializable_hash
+            render json: { message: 'Customer updates successfully', customer: customer }
+          else
+            render json: { error: customer.errors.full_messages }, status: :unprocessable_entity
+          end
+        else
+          render json: { error: 'You are not authorized to perform this action' }, status: :unauthorized
+        end
+      end
+
+      def destroy
+        if @current_user.instance_of?(Customer)
+          if @current_user.destroy
+            customer = CustomerSerializer.new(@current_user).serializable_hash
+            render json: { message: 'Customer deleted successfully', customer: customer }
+          else
+            render json: { error: @current_user.errors.full_messages }, status: :unprocessable_entity
+          end
+        else
+          render json: { error: 'You are not authorized to perform this action' }, status: :unauthorized
+        end
+      end
+
       private
 
       def customer_params
