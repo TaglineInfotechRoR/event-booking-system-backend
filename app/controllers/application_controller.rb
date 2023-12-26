@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::API
+  include ApiResponseHandler
+
   before_action :authenticate_request
 
   private

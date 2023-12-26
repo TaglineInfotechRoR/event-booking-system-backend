@@ -4,52 +4,37 @@ module Api
   module V1
     class EventOrganizersController < ApplicationController
       skip_before_action :authenticate_request, only: :create
+      before_action :set_current_user, except: :create
 
       def create
         event_organizer = EventOrganizer.new(event_organizer_params)
 
         if event_organizer.save
-          render json: { message: 'Organizer created successfully' }
+          render_success(serialized_organizer(event_organizer), 'Organizer created successfully')
         else
-          render json: { error: event_organizer.errors.full_messages }, status: :unprocessable_entity
+          render_error(event_organizer.errors.full_messages)
         end
       end
 
       def update
-        if @current_user.instance_of?(EventOrganizer)
+        unless @current_user.instance_of?(EventOrganizer)
+          return render_unauthorized_error('You are not authorized to perform this action')
+        end
 
-          if event.nil?
-            render json: { error: 'Event organizer not found' }, status: :not_found
-            return
-          end
-
-          if @current_user.update(event_organizer_params)
-            customer = EventOrganizerSerializer.new(@current_user).serializable_hash
-            render json: { message: 'Organizer updates successfully', customer: customer }
-          else
-            render json: { error: customer.errors.full_messages }, status: :unprocessable_entity
-          end
+        if @current_user.update(event_organizer_params)
+          render_success(serialized_organizer(@current_user), 'Organizer updated successfully')
         else
-          render json: { error: 'You are not authorized to perform this action' }, status: :forbidden
+          render_error(@current_user.errors.full_messages)
         end
       end
 
       def destroy
-        if @current_user.instance_of?(EventOrganizer)
+        return render_not_authorized unless @current_user.instance_of?(EventOrganizer)
 
-          if @current_user.nil?
-            render json: { error: 'Event organizer not found' }, status: :not_found
-            return
-          end
-
-          if @current_user.destroy
-            customer = EventOrganizerSerializer.new(@current_user).serializable_hash
-            render json: { message: 'Organizer deleted successfully', customer: customer }
-          else
-            render json: { error: customer.errors.full_messages }, status: :unprocessable_entity
-          end
+        if @current_user.destroy
+          render_success(serialized_organizer(@current_user), 'Organizer deleted successfully')
         else
-          render json: { error: 'You are not authorized to perform this action' }, status: :forbidden
+          render_error(@current_user.errors.full_messages)
         end
       end
 
@@ -65,6 +50,15 @@ module Api
           :phone,
           :gender
         )
+      end
+
+      def set_current_user
+        @current_user = EventOrganizer.find(params[:id])
+        render_not_found('Event organizer not found') unless @current_user
+      end
+
+      def serialized_organizer(object)
+        EventOrganizerSerializer.new(object).serializable_hash
       end
     end
   end

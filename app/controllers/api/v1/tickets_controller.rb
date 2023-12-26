@@ -3,38 +3,33 @@
 module Api
   module V1
     class TicketsController < ApplicationController
-      def update
-        ticket = Ticket.find_by(id: params[:id])
+      before_action :find_ticket, only: %i[update destroy]
 
-        if ticket.nil?
-          render json: { error: 'Ticket not found' }, status: :not_found
-          return
+      def update
+        return render_not_found('Ticket not found') unless @ticket
+
+        unless current_user_event_organizer?
+          return render_unauthorized_error("You do not have permission to delete this event's ticket.")
         end
 
-        if @current_user.instance_of?(EventOrganizer)
-          if ticket.update(ticket_params)
-            ticket = TicketSerializer.new(ticket).serializable_hash
-            render json: { message: 'Ticket updated successfully', ticket: ticket }
-          else
-            render json: { error: ticket.errors.full_messages }, status: :unprocessable_entity
-          end
+        if @ticket.update(ticket_params)
+          render_success(serialized_ticket(@ticket), 'Ticket updated successfully')
         else
-          render json: { error: "You do not have permission to update this even's ticket." }, status: :unauthorized
+          render_error(@ticket.errors.full_messages)
         end
       end
 
       def destroy
-        ticket = Ticket.find_by(id: params[:id])
+        return render_not_found('Ticket not found') unless @ticket
 
-        if @current_user.instance_of?(EventOrganizer)
-          if ticket.destroy
-            ticket = TicketSerializer.new(ticket).serializable_hash
-            render json: { message: 'Ticket deleted successfully', ticket: ticket }
-          else
-            render json: { error: ticket.errors.full_messages }, status: :unprocessable_entity
-          end
+        unless current_user_event_organizer?
+          return render_unauthorized_error("You do not have permission to delete this event's ticket.")
+        end
+
+        if @ticket.destroy
+          render_success(serialized_ticket(@ticket), 'Ticket deleted successfully')
         else
-          render json: { error: "You do not have permission to delete this event's ticket." }, status: :forbidden
+          render_error(@ticket.errors.full_messages)
         end
       end
 
@@ -42,6 +37,18 @@ module Api
 
       def ticket_params
         params.require(:tickets).permit(:ticket_type, :price, :availability)
+      end
+
+      def find_ticket
+        @ticket = Ticket.find_by(id: params[:id])
+      end
+
+      def current_user_event_organizer?
+        @current_user.instance_of?(EventOrganizer)
+      end
+
+      def serialized_ticket(object)
+        TicketSerializer.new(object).serializable_hash
       end
     end
   end

@@ -1,13 +1,18 @@
 # frozen_string_literal: true
 
 class EventConfirmationJob
-  include Sidekiq::Job
-  sidekiq_options queue: :default
+  include Sidekiq::Worker
 
   def perform(event_id)
-    p ' We have a change on events.'
-    p 'Events customers::::::::::::::'
-    customers = Event.find(event_id).customers
-    p customers.inspect.to_s
+    Rails.logger.info('We have a change on events.')
+    Rails.logger.info('Events customers.')
+
+    event = Event.find_by(id: event_id)
+    if event
+      customers = event.customers
+      Rails.logger.info(customers.inspect.to_s)
+    else
+      Rails.logger.error("Event not found for ID: #{event_id}")
+    end
   end
 end
