@@ -51,7 +51,6 @@ module Api
       end
 
       def serialized_booking(booking)
-        binding.pry
         BookingSerializer.new(booking).serializable_hash
       end
     end
