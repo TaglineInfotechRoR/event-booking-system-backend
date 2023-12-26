@@ -13,8 +13,8 @@ gem 'jwt', '~> 2.3', '>= 2.3.0'
 gem 'pg', '~> 1.1'
 gem 'puma', '>= 5.0'
 gem 'rack-cors'
-gem 'tzinfo-data', platforms: %i[mswin mswin64 mingw x64_mingw jruby] ## Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'sidekiq', '~> 7.2'
+gem 'tzinfo-data', platforms: %i[mswin mswin64 mingw x64_mingw jruby] ## Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 
 group :development, :test do
   gem 'debug', platforms: %i[mri mswin mswin64 mingw x64_mingw]
@@ -26,4 +26,3 @@ end
 group :development do
   gem 'bullet'
 end
-

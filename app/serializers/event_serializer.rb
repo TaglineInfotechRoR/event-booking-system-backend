@@ -2,5 +2,11 @@
 
 class EventSerializer
   include JSONAPI::Serializer
-  attributes :name, :date, :venue, :event_organizer
+  include CustomSerializableHash
+
+  attributes :name, :date, :venue
+
+  attribute :event_orgainzer do |event|
+    EventOrganizerSerializer.new(event.event_organizer).serializable_hash
+  end
 end

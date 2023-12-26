@@ -3,64 +3,52 @@
 module Api
   module V1
     class EventsController < ApplicationController
+      before_action :authorize_event_organizer, except: [:index]
+
       def index
-        if @current_user.instance_of?(EventOrganizer)
-          events = @current_user.events
-          render json: { events: events }
-        else
-          render json: { error: 'You do not have permission to view others events.' }, status: :unauthorized
-        end
+        events = @current_user.events.includes(:event_organizer)
+        render_success(serialized_event(events))
       end
 
       def create
-        if @current_user.instance_of?(EventOrganizer)
-          event = Event.new(event_params)
-          event.event_organizer_id = @current_user.id
-          if event.save
-            event = EventSerializer.new(event).serializable_hash
-            render json: { message: 'Event created successfully', event: event }
-          else
-            render json: { error: event.errors.full_messages }, status: :unprocessable_entity
-          end
+        event = Event.new(event_params)
+        event.event_organizer_id = @current_user.id
+
+        if event.save
+          render_success(serialized_event(event), 'Event created successfully')
         else
-          render json: { error: 'You do not have permission to create this event.' }, status: :unauthorized
+          render_error(event.errors.full_messages)
         end
       end
 
-      def edit; end
-
       def update
         event = Event.find_by(id: params[:id])
+        return render_not_found('Event not found') unless event
 
-        if event.nil?
-          render json: { error: 'Event not found' }, status: :not_found
-          return
+        unless @current_user.events.include?(event)
+          return render_unauthorized_error('You can only update events organized by you.')
         end
 
-        if @current_user.instance_of?(EventOrganizer) && @current_user.events.include?(event)
-          if event.update(event_params)
-            EventConfirmationJob.perform_async(event.id)
-            event = EventSerializer.new(event).serializable_hash
-            render json: { message: 'Event updated successfully', event: event }
-          else
-            render json: { error: event.errors.full_messages }, status: :unprocessable_entity
-          end
+        if event.update(event_params)
+          perform_async_confirmation(event)
+          render_success(serialized_event(event), 'Event updates successfully')
         else
-          render json: { error: 'You do not have permission to update this event.' }, status: :unauthorized
+          render_error(event.errors.full_messages)
         end
       end
 
       def destroy
         event = Event.find_by(id: params[:id])
-        if @current_user.instance_of?(EventOrganizer) && @current_user.events.include?(event)
-          if event.destroy
-            event = EventSerializer.new(event).serializable_hash
-            render json: { message: 'Event deleted successfully', event: event }
-          else
-            render json: { error: event.errors.full_messages }, status: :unprocessable_entity
-          end
+        return render_not_found('Event not found') unless event
+
+        unless @current_user.events.include?(event)
+          render_unauthorized_error('You can only update events organized by you.')
+        end
+
+        if event.destroy
+          render_success(serialized_event(event), 'Event deleted successfully')
         else
-          render json: { error: 'You do not have permission to delete this event.' }, status: :forbidden
+          render_error(event.errors.full_messages)
         end
       end
 
@@ -68,6 +56,20 @@ module Api
 
       def event_params
         params.require(:event).permit(:name, :date, :venue, tickets_attributes: %i[ticket_type price availability])
+      end
+
+      def serialized_event(object)
+        EventSerializer.new(object).serializable_hash
+      end
+
+      def authorize_event_organizer
+        return if @current_user.instance_of?(EventOrganizer)
+
+        render_unauthorized_error('You do not have permission for this action.')
+      end
+
+      def perform_async_confirmation(event)
+        EventConfirmationJob.perform_async(event.id)
       end
     end
   end
